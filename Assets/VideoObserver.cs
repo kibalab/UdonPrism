@@ -10,6 +10,8 @@ public class VideoObserver : UdonSharpBehaviour
 {
     public Material screen;
 
+    public Camera cam;
+
     public MeshRenderer SubScreen;
 
     public Texture2D pool;
@@ -23,7 +25,9 @@ public class VideoObserver : UdonSharpBehaviour
 
     public void Update()
     {
+        /*
         var tex = screen.mainTexture;
+        
 
         if (tex == null)
         {
@@ -36,13 +40,16 @@ public class VideoObserver : UdonSharpBehaviour
             return;
         }
 
-        var pixel = ((Texture2D)tex).GetPixel(i, j);
+        Color pixelBuffer = ((Texture2D)tex).GetPixel(i, j);
+        pool.SetPixel(i, j, pixelBuffer);
+        pool.Apply();
 
-        pool.SetPixel(i, j, pixel);
+        var pixel = pool.GetPixel(i, j);
+
 
         SubScreen.material.SetTexture("_MainTex", ((Texture2D)tex));
 
-        test.text = $"X : {i}, Y : {j}, Color : {pixel}, W : {tex.width}, H : {tex.height}";
+        test.text = $"X : {i}, Y : {j}, Color : {pixel}, W : {((Texture2D)tex).width}, H : {((Texture2D)tex).height}";
 
         i++;
         if (i > tex.width)
@@ -54,5 +61,16 @@ public class VideoObserver : UdonSharpBehaviour
                 j = 0;
             }
         }
+        */
+    }
+
+    private void OnPostRender()
+    {
+        var renT = cam.targetTexture;
+
+        pool.ReadPixels(new Rect(0, 0, renT.width, renT.height), 0, 0);
+        pool.Apply();
+
+        Debug.Log("OnPostRender()");
     }
 }
