@@ -11,6 +11,8 @@ public class CamReader : UdonSharpBehaviour
     private RenderTexture CamTex;
     public Texture2D Render;
 
+    public DataReader DataReader;
+
     public float RenderFreq = 1.0f;
 
     void Start()
@@ -34,5 +36,6 @@ public class CamReader : UdonSharpBehaviour
 
         Render.ReadPixels(new Rect(0, 0, CamTex.width, CamTex.height), 0, 0);
         Render.Apply();
+        DataReader.Read();
     }
 }
