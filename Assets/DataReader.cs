@@ -18,23 +18,24 @@ public class DataReader : UdonSharpBehaviour
     public void Read()
     {
         var data = ReadPixels();
-        data = FlipY(data);
+        //data = FlipY(data);
         PrintLine(data);
         var stringdata = Decryption(data);
-        Debug.Log(stringdata);
+        //Debug.Log(stringdata);
         console.text = stringdata;
+        Debug.Log(stringdata);
     }
 
     public string Decryption(bool[] data)
     {
         var stringData = "";
-        var chars = new int[288];
+        var chars = new int[4608];
         for (var i = 0; i < chars.Length; i++)
         {
             chars[i] = 0;
-            for (var j = 0; j < 32; j++)
+            for (var j = 0; j < 16; j++)
             {
-                if(data[i*32+j]) chars[i] |= (int)(1 << j);
+                if(data[i*16+j]) chars[i] |= (int)(1 << j);
             }
 
             stringData += (char)chars[i];
@@ -43,6 +44,7 @@ public class DataReader : UdonSharpBehaviour
         return stringData;
     }
 
+    
     public void PrintLine(bool[] pixelArray)
     {
         string test = "";
@@ -52,28 +54,55 @@ public class DataReader : UdonSharpBehaviour
         }
         Debug.Log(test);
     }
-
+    /*
     public bool[] FlipY(bool[] lines)
     {
-        for (var i = 0; i < 36; i++)
+        for (var i = 0; i < 72; i++)
         {
-            for (var j = 0; j < 128; j++)
+            for (var j = 0; j < 256; j++)
             {
-                var tmp = lines[i * 128 + j];
-                lines[i * 128 + j] = lines[(71 - i) * 128 + j];
-                lines[(71 - i) * 128 + j] = tmp;
+                var tmp = lines[i * 256 + j];
+                lines[i * 256 + j] = lines[(143 - i) * 256 + j];
+                lines[(143 - i) * 256 + j] = tmp;
             }
         }
 
         return lines;
-    }
+    }*/
 
     public bool[] ReadPixels()
     {
-        var pixelArray = new bool[9216];
+        var pixelArray = new bool[73728];
 
-        for (var i = 0; i < 9216; i++)
-            pixelArray[i] = DataScreen.GetPixel(5 + (i % 128) * 10, 5 + (i / 128) * 10).grayscale > 0.5f;
+        for (var i = 0; i < 36864; i++)
+        {
+
+            var XIndex = 2 + (i % 256) * 5;
+            var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
+
+            var pixel = DataScreen.GetPixel(XIndex, YIndex);
+            //pixelArray[i] = pixel > 0.5f;
+            if (pixel.r > 0.2f)
+            {
+                pixelArray[i * 2] = false;
+                pixelArray[i * 2 + 1] = true;
+            }
+            else if (pixel.g > 0.2f)
+            {
+                pixelArray[i * 2] = true;
+                pixelArray[i * 2 + 1] = false;
+            }
+            else if (pixel.b > 0.2f)
+            {
+                pixelArray[i * 2] = true;
+                pixelArray[i * 2 + 1] = true;
+            }
+            else
+            {
+                pixelArray[i * 2] = false;
+                pixelArray[i * 2 + 1] = false;
+            }
+        }
 
         return pixelArray;
     }
