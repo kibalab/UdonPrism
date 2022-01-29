@@ -19,7 +19,7 @@ public class DataReader : UdonSharpBehaviour
     {
         var data = ReadPixels();
         //data = FlipY(data);
-        PrintLine(data);
+        //PrintLine(data);
         var stringdata = Decryption(data);
         //Debug.Log(stringdata);
         console.text = stringdata;
@@ -29,7 +29,7 @@ public class DataReader : UdonSharpBehaviour
     public string Decryption(bool[] data)
     {
         var stringData = "";
-        var chars = new int[4608];
+        var chars = new int[2304];
         for (var i = 0; i < chars.Length; i++)
         {
             chars[i] = 0;
@@ -44,7 +44,7 @@ public class DataReader : UdonSharpBehaviour
         return stringData;
     }
 
-    
+    /*
     public void PrintLine(bool[] pixelArray)
     {
         string test = "";
@@ -54,7 +54,7 @@ public class DataReader : UdonSharpBehaviour
         }
         Debug.Log(test);
     }
-    /*
+
     public bool[] FlipY(bool[] lines)
     {
         for (var i = 0; i < 72; i++)
@@ -72,7 +72,7 @@ public class DataReader : UdonSharpBehaviour
 
     public bool[] ReadPixels()
     {
-        var pixelArray = new bool[73728];
+        var pixelArray = new bool[36864];
 
         for (var i = 0; i < 36864; i++)
         {
@@ -81,27 +81,7 @@ public class DataReader : UdonSharpBehaviour
             var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
 
             var pixel = DataScreen.GetPixel(XIndex, YIndex);
-            //pixelArray[i] = pixel > 0.5f;
-            if (pixel.r > 0.2f)
-            {
-                pixelArray[i * 2] = false;
-                pixelArray[i * 2 + 1] = true;
-            }
-            else if (pixel.g > 0.2f)
-            {
-                pixelArray[i * 2] = true;
-                pixelArray[i * 2 + 1] = false;
-            }
-            else if (pixel.b > 0.2f)
-            {
-                pixelArray[i * 2] = true;
-                pixelArray[i * 2 + 1] = true;
-            }
-            else
-            {
-                pixelArray[i * 2] = false;
-                pixelArray[i * 2 + 1] = false;
-            }
+            pixelArray[i] = pixel.r > 0.5f;
         }
 
         return pixelArray;
