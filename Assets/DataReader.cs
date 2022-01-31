@@ -15,19 +15,24 @@ public class DataReader : UdonSharpBehaviour
 
     public Text console;
 
+    public int FrameCalculationDivision = 1;
+    int divisionCalculationCount = 0;
+    int OneSectorSize = 0;
+
+    bool Reading = false;
+
+    bool[] pixelArray = new bool[36864];
+
     public void Read()
     {
-        var data = ReadPixels();
-        //data = FlipY(data);
-        //PrintLine(data);
-        var stringdata = Decryption(data);
-        //Debug.Log(stringdata);
-        console.text = stringdata;
-        Debug.Log(stringdata);
+        if(!Reading) ReadScreen();
+        else Debug.Log($"[PrismDataReader] Now Reading - Please try again later");
     }
 
-    public string Decryption(bool[] data)
+    private string Decryption(bool[] data)
     {
+        Debug.Log($"[PrismDataReader] Start Decryption");
+
         var stringData = "";
         var chars = new int[2304];
         for (var i = 0; i < chars.Length; i++)
@@ -37,6 +42,8 @@ public class DataReader : UdonSharpBehaviour
             {
                 if(data[i*16+j]) chars[i] |= (int)(1 << j);
             }
+
+            if ((char)chars[i] == null) return stringData; // Null일 경우 이후 데이터는 비어있음으로 끝냄
 
             stringData += (char)chars[i];
         }
@@ -70,20 +77,51 @@ public class DataReader : UdonSharpBehaviour
         return lines;
     }*/
 
-    public bool[] ReadPixels()
+    private void ReadScreen()
     {
-        var pixelArray = new bool[36864];
+        Reading = true;
+        pixelArray = new bool[36864];
+        OneSectorSize = (36864 / FrameCalculationDivision);
+        Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
+    }
 
-        for (var i = 0; i < 36864; i++)
+    private void OnReadEnd()
+    {
+        Reading = false;
+        Debug.Log($"[PrismDataReader] End Read");
+        var stringdata = Decryption(pixelArray);
+        console.text = stringdata;
+        Debug.Log(stringdata);
+    }
+
+    private void Update()
+    {
+        #region ReadPixels
         {
+            if (Reading) return;
 
-            var XIndex = 2 + (i % 256) * 5;
-            var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
+            var firstPixel = divisionCalculationCount * OneSectorSize;
 
-            var pixel = DataScreen.GetPixel(XIndex, YIndex);
-            pixelArray[i] = pixel.r > 0.5f;
+            Debug.Log($"[PrismDataReader] Read Sector {firstPixel} ~ {firstPixel + OneSectorSize}");
+
+            for (var i = firstPixel; i < firstPixel + OneSectorSize; i++)
+            {
+
+                var XIndex = 2 + (i % 256) * 5;
+                var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
+
+                var pixel = DataScreen.GetPixel(XIndex, YIndex);
+                pixelArray[i] = pixel.r > 0.5f;
+
+                if (i == pixelArray.Length - 1)
+                {
+                    OnReadEnd();
+                    break;
+                }
+            }
+
+            divisionCalculationCount++;
         }
-
-        return pixelArray;
+        #endregion ReadPixels
     }
 }
