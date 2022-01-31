@@ -13,15 +13,15 @@ public class DataReader : UdonSharpBehaviour
 
     public Texture2D DataScreen;
 
-    public Text console;
+    public Text Console;
 
-    public int FrameCalculationDivision = 1;
-    int divisionCalculationCount = 0;
+    public int SectorDivision = 1;
+    int CurrentSectorIndex = 0;
     int OneSectorSize = 0;
 
     bool Reading = false;
 
-    bool[] pixelArray = new bool[36864];
+    string data = "";
 
     public void Read()
     {
@@ -34,7 +34,7 @@ public class DataReader : UdonSharpBehaviour
         Debug.Log($"[PrismDataReader] Start Decryption");
 
         var stringData = "";
-        var chars = new int[2304];
+        var chars = new int[data.Length / 32];
         for (var i = 0; i < chars.Length; i++)
         {
             chars[i] = 0;
@@ -80,48 +80,69 @@ public class DataReader : UdonSharpBehaviour
     private void ReadScreen()
     {
         Reading = true;
-        pixelArray = new bool[36864];
-        OneSectorSize = (36864 / FrameCalculationDivision);
+
+        ReaderInit();
+
+        OneSectorSize = (36864 / SectorDivision);
         Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
+    }
+
+    public void ReaderInit()
+    {
+        CurrentSectorIndex = 0;
+        data = "";
+        //Console.text = "";
     }
 
     private void OnReadEnd()
     {
         Reading = false;
         Debug.Log($"[PrismDataReader] End Read");
-        var stringdata = Decryption(pixelArray);
-        console.text = stringdata;
-        Debug.Log(stringdata);
+        Debug.Log(data);
     }
 
     private void Update()
     {
+        #region ReadInit
+        var SectorPixelArray = new bool[OneSectorSize];
+        #endregion ReadInit
+
         #region ReadPixels
         {
-            if (Reading) return;
+            if (!Reading) return;
 
-            var firstPixel = divisionCalculationCount * OneSectorSize;
+            var firstPixel = CurrentSectorIndex * OneSectorSize;
 
             Debug.Log($"[PrismDataReader] Read Sector {firstPixel} ~ {firstPixel + OneSectorSize}");
 
+
             for (var i = firstPixel; i < firstPixel + OneSectorSize; i++)
             {
+                if (CurrentSectorIndex >= SectorDivision)
+                {
+                    Reading = false;
+                    break;
+                }
 
                 var XIndex = 2 + (i % 256) * 5;
                 var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
 
                 var pixel = DataScreen.GetPixel(XIndex, YIndex);
-                pixelArray[i] = pixel.r > 0.5f;
-
-                if (i == pixelArray.Length - 1)
-                {
-                    OnReadEnd();
-                    break;
-                }
+                SectorPixelArray[i - firstPixel] = pixel.r > 0.5f;
             }
 
-            divisionCalculationCount++;
+            CurrentSectorIndex++;
         }
         #endregion ReadPixels
+
+        #region Sector Decryption
+        {
+            var stringdata = Decryption(SectorPixelArray);
+            data += stringdata;
+            //Console.text += stringdata;
+
+            if (!Reading) OnReadEnd();
+        }
+        #endregion
     }
 }

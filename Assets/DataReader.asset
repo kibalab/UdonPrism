@@ -112,7 +112,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: console
+      Data: Console
     - Name: $v
       Entry: 7
       Data: 6|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -139,10 +139,10 @@ MonoBehaviour:
       Data: UnityEngineUIText
     - Name: symbolOriginalName
       Entry: 1
-      Data: console
+      Data: Console
     - Name: symbolUniqueName
       Entry: 1
-      Data: console
+      Data: Console
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -175,7 +175,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: FrameCalculationDivision
+      Data: SectorDivision
     - Name: $v
       Entry: 7
       Data: 10|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -202,10 +202,10 @@ MonoBehaviour:
       Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: FrameCalculationDivision
+      Data: SectorDivision
     - Name: symbolUniqueName
       Entry: 1
-      Data: FrameCalculationDivision
+      Data: SectorDivision
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -238,7 +238,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: divisionCalculationCount
+      Data: CurrentSectorIndex
     - Name: $v
       Entry: 7
       Data: 14|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -259,10 +259,10 @@ MonoBehaviour:
       Data: SystemInt32
     - Name: symbolOriginalName
       Entry: 1
-      Data: divisionCalculationCount
+      Data: CurrentSectorIndex
     - Name: symbolUniqueName
       Entry: 1
-      Data: divisionCalculationCount
+      Data: CurrentSectorIndex
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
@@ -415,7 +415,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: pixelArray
+      Data: data
     - Name: $v
       Entry: 7
       Data: 24|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -427,7 +427,7 @@ MonoBehaviour:
       Data: 26|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: System.Boolean[], mscorlib
+      Data: System.String, mscorlib
     - Name: 
       Entry: 8
       Data: 
@@ -439,13 +439,13 @@ MonoBehaviour:
       Data: 0
     - Name: symbolResolvedTypeName
       Entry: 1
-      Data: SystemBooleanArray
+      Data: SystemString
     - Name: symbolOriginalName
       Entry: 1
-      Data: pixelArray
+      Data: data
     - Name: symbolUniqueName
       Entry: 1
-      Data: pixelArray
+      Data: data
     - Name: symbolDefaultValue
       Entry: 6
       Data: 
