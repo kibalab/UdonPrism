@@ -31,10 +31,10 @@ public class DataReader : UdonSharpBehaviour
 
     private string Decryption(bool[] data)
     {
-        Debug.Log($"[PrismDataReader] Start Decryption");
+        //Debug.Log($"[PrismDataReader] Start Decryption");
 
         var stringData = "";
-        var chars = new int[data.Length / 32];
+        var chars = new int[data.Length / 16];
         for (var i = 0; i < chars.Length; i++)
         {
             chars[i] = 0;
@@ -51,7 +51,6 @@ public class DataReader : UdonSharpBehaviour
         return stringData;
     }
 
-    /*
     public void PrintLine(bool[] pixelArray)
     {
         string test = "";
@@ -61,6 +60,8 @@ public class DataReader : UdonSharpBehaviour
         }
         Debug.Log(test);
     }
+    /*
+    
 
     public bool[] FlipY(bool[] lines)
     {
@@ -113,7 +114,7 @@ public class DataReader : UdonSharpBehaviour
 
             var firstPixel = CurrentSectorIndex * OneSectorSize;
 
-            Debug.Log($"[PrismDataReader] Read Sector {firstPixel} ~ {firstPixel + OneSectorSize}");
+            //Debug.Log($"[PrismDataReader] Read Sector {firstPixel} ~ {firstPixel + OneSectorSize}");
 
 
             for (var i = firstPixel; i < firstPixel + OneSectorSize; i++)
@@ -131,12 +132,14 @@ public class DataReader : UdonSharpBehaviour
                 SectorPixelArray[i - firstPixel] = pixel.r > 0.5f;
             }
 
+
             CurrentSectorIndex++;
         }
         #endregion ReadPixels
 
         #region Sector Decryption
         {
+            //PrintLine(SectorPixelArray);
             var stringdata = Decryption(SectorPixelArray);
             data += stringdata;
             //Console.text += stringdata;
