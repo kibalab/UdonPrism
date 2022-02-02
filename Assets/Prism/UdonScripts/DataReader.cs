@@ -18,13 +18,16 @@ public class DataReader : UdonSharpBehaviour
 
         public Text Console;
 
+        public UdonBehaviour[] EventBehaviours;
+
     #endregion Public Field
 
     #region Member Field
 
         string m_Data = "";
+        string m_Error = "";
 
-        //[Indexes]
+        // [ Indexes ]
         int CurrentFrameIndex = 1;
         int FrameCount = 1;
         int CurrentFrameBytes = 0;
@@ -34,19 +37,30 @@ public class DataReader : UdonSharpBehaviour
         int OneSectorSize = 0;
 
 
-        //[State]
+        // [ State ]
         bool IsSectorReading = false;
         bool IsEndFrameRead = false;
         bool IsReadable = false;
 
     #endregion Member Field
 
+    #region Properties
+        public string Data
+        {
+            get => m_Data;
+        }
+        public string Error
+        {
+            get => m_Error;
+        }
+    #endregion Properties
+
     #endregion Field
 
 
     public void Start()
     {
-        OneSectorSize = (36864 / SectorDivision);
+        OnPrismReady();
     }
 
     public void Read()
@@ -74,6 +88,18 @@ public class DataReader : UdonSharpBehaviour
 
         return stringData;
     }
+
+
+    /* [ Header ]
+     * Header[0] : 0 (Always)
+     * Header[1] : Current Frame
+     * Header[2] : 0 (Always)
+     * Header[3] : All Frame Count
+     * Header[4] : 0 (Always)
+     * Header[5] : Current Frame Byte Size
+     * Header[6] : 0 (Always)
+     * Header[7] : 0 (Always)
+     */
 
     private int[] DecryptInt32(bool[] bitData)
     {
@@ -117,6 +143,13 @@ public class DataReader : UdonSharpBehaviour
         return lines;
     }*/
 
+    private void OnPrismReady()
+    {
+        OneSectorSize = (36864 / SectorDivision);
+
+        InvokeEvent(nameof(OnPrismReady));
+    }
+
     private void OnPrismStart()
     {     
         Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
@@ -124,9 +157,11 @@ public class DataReader : UdonSharpBehaviour
         CurrentFrameIndex = 0;
         FrameCount = 0;
         CurrentFrameBytes = 0;
+
+        InvokeEvent(nameof(OnPrismStart));
     }
 
-    private void OnFrameChange(int[] header)
+    private void OnPrismFrameChange(int[] header)
     {
         CurrentFrameIndex = header[1];
         FrameCount = header[3];
@@ -138,22 +173,28 @@ public class DataReader : UdonSharpBehaviour
         IsEndFrameRead = false; // Start Read Current Frame
 
         Debug.Log($"[PrismDataReader] OnFrameChanged | Current Frame {header[1]}");
+
+        InvokeEvent(nameof(OnPrismFrameChange));
     }
 
-    private void OnFrameReadEnd()
+    private void OnPrismFrameReadEnd()
     {
         IsSectorReading = false;
         IsEndFrameRead = true; // End Current Frame Read
 
         Debug.Log($"[PrismDataReader] Frame Read End");
+
+        InvokeEvent(nameof(OnPrismFrameReadEnd));
     }
 
-    private void OnReadEnd()
+    private void OnPrismReadEnd()
     {
         Debug.Log($"[PrismDataReader] Read End");
         Debug.Log($"[PrismDataReader] Data : {m_Data}");
 
         IsReadable = false;
+
+        InvokeEvent(nameof(OnPrismReadEnd));
     }
 
     private void OnReadEndException()
@@ -164,6 +205,15 @@ public class DataReader : UdonSharpBehaviour
 
         IsSectorReading = false;
         IsReadable = false;
+
+        OnPrismException("Frame changed while reading");
+    }
+
+    private void OnPrismException(string e)
+    {
+        m_Error = e;
+
+        InvokeEvent(nameof(OnPrismException));
     }
 
     // IsEndFrameRead : Current Frame Read State [Bool]
@@ -187,7 +237,7 @@ public class DataReader : UdonSharpBehaviour
 
             if (!IsSectorReading && header[1] == 1) OnPrismStart();
 
-            if (header[1] > CurrentFrameIndex) OnFrameChange(header);
+            if (header[1] > CurrentFrameIndex) OnPrismFrameChange(header);
 
         #endregion Watcher
 
@@ -205,14 +255,12 @@ public class DataReader : UdonSharpBehaviour
 
         if (CurrentSectorIndex == SectorDivision || CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
         {
-            Debug.Log("OnFrameReadEnd()");
-            OnFrameReadEnd();
+            OnPrismFrameReadEnd();
         }
 
         if (CurrentFrameIndex == FrameCount && CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
         {
-            Debug.Log("OnReadEnd()");
-            OnReadEnd();
+            OnPrismReadEnd();
         }
 
         #endregion End
@@ -239,5 +287,14 @@ public class DataReader : UdonSharpBehaviour
         }
 
         return SectorPixelArray;
+    }
+
+
+    private void InvokeEvent(string eventName)
+    {
+        foreach(var behaviour in EventBehaviours)
+        {
+            behaviour.SendCustomEvent(eventName);
+        }
     }
 }
