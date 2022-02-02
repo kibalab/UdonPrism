@@ -18,7 +18,7 @@ public class DataReader : UdonSharpBehaviour
 
         public Text Console;
 
-        public UdonBehaviour[] EventBehaviours;
+        public UdonBehaviour EventBehaviour;
 
     #endregion Public Field
 
@@ -292,9 +292,6 @@ public class DataReader : UdonSharpBehaviour
 
     private void InvokeEvent(string eventName)
     {
-        foreach(var behaviour in EventBehaviours)
-        {
-            behaviour.SendCustomEvent(eventName);
-        }
+        EventBehaviour.SendCustomEvent(eventName);
     }
 }
