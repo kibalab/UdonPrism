@@ -251,7 +251,7 @@ MonoBehaviour:
       Data: 16|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: DataReader, Assembly-CSharp
+      Data: Prism.DataReader, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 

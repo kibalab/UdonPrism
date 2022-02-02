@@ -4,38 +4,40 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
-
-public class CamReader : UdonSharpBehaviour
+namespace Prism
 {
-    private Camera Reader;
-    private RenderTexture CamTex;
-    public Texture2D Render;
-
-    public DataReader DataReader;
-
-    public float RenderFreq = 1.0f;
-
-    void Start()
+    public class CamReader : UdonSharpBehaviour
     {
-        Reader = gameObject.GetComponent<Camera>();
-        CamTex = Reader.targetTexture;
-    }
+        private Camera Reader;
+        private RenderTexture CamTex;
+        public Texture2D Render;
 
-    private void OnPostRender()
-    {
-        
-        if (RenderFreq >= 0)
+        public DataReader DataReader;
+
+        public float RenderFreq = 1.0f;
+
+        void Start()
         {
-            RenderFreq -= Time.deltaTime;
-            return;
-        }
-        else
-        {
-            RenderFreq = 1.0f;
+            Reader = gameObject.GetComponent<Camera>();
+            CamTex = Reader.targetTexture;
         }
 
-        Render.ReadPixels(new Rect(0, 0, CamTex.width, CamTex.height), 0, 0);
-        Render.Apply();
-        DataReader.Read();
+        private void OnPostRender()
+        {
+
+            if (RenderFreq >= 0)
+            {
+                RenderFreq -= Time.deltaTime;
+                return;
+            }
+            else
+            {
+                RenderFreq = 1.0f;
+            }
+
+            Render.ReadPixels(new Rect(0, 0, CamTex.width, CamTex.height), 0, 0);
+            Render.Apply();
+            DataReader.Read();
+        }
     }
 }

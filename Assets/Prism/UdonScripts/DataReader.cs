@@ -8,21 +8,23 @@ using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class DataReader : UdonSharpBehaviour
+namespace Prism
 {
-    #region Field
+    public class DataReader : UdonSharpBehaviour
+    {
+        #region Field
 
-    #region Public Field
+        #region Public Field
 
         public Texture2D DataScreen;
 
         public Text Console;
 
-        public UdonBehaviour EventBehaviour;
+        public EventManager EventBehaviour;
 
-    #endregion Public Field
+        #endregion Public Field
 
-    #region Member Field
+        #region Member Field
 
         string m_Data = "";
         string m_Error = "";
@@ -42,9 +44,9 @@ public class DataReader : UdonSharpBehaviour
         bool IsEndFrameRead = false;
         bool IsReadable = false;
 
-    #endregion Member Field
+        #endregion Member Field
 
-    #region Properties
+        #region Properties
         public string Data
         {
             get => m_Data;
@@ -53,175 +55,175 @@ public class DataReader : UdonSharpBehaviour
         {
             get => m_Error;
         }
-    #endregion Properties
+        #endregion Properties
 
-    #endregion Field
+        #endregion Field
 
 
-    public void Start()
-    {
-        OnPrismReady();
-    }
-
-    public void Read()
-    {
-        IsReadable = true;
-    }
-
-    private string DecryptUnicode(bool[] bitData)
-    {
-        //Debug.Log($"[PrismDataReader] Start Decryption");
-
-        var stringData = "";
-        for (var i = 0; i < bitData.Length / 16; i++)
+        public void Start()
         {
-            int unicodeCharacter = 0;
-
-            for (var j = 0; j < 16; j++)
-                if (bitData[i * 16 + j]) unicodeCharacter |= (int)(1 << j);
-
-            // this not working
-            // if ((char)chars[i] == null) return stringData; // Null일 경우 이후 데이터는 비어있음으로 끝냄
-
-            stringData += (char)unicodeCharacter;
+            OnPrismReady();
         }
 
-        return stringData;
-    }
-
-
-    /* [ Header ]
-     * Header[0] : 0 (Always)
-     * Header[1] : Current Frame
-     * Header[2] : 0 (Always)
-     * Header[3] : All Frame Count
-     * Header[4] : 0 (Always)
-     * Header[5] : Current Frame Byte Size
-     * Header[6] : 0 (Always)
-     * Header[7] : 0 (Always)
-     */
-
-    private int[] DecryptInt32(bool[] bitData)
-    {
-        var intData = new int[bitData.Length / 32];
-        for (var i = 0; i < intData.Length; i++)
+        public void Read()
         {
-            intData[i] = 0;
-            for (var j = 0; j < 32; j++)
+            IsReadable = true;
+        }
+
+        private string DecryptUnicode(bool[] bitData)
+        {
+            //Debug.Log($"[PrismDataReader] Start Decryption");
+
+            var stringData = "";
+            for (var i = 0; i < bitData.Length / 16; i++)
             {
-                if (bitData[i * 32 + j]) intData[i] |= (int)(1 << j);
+                int unicodeCharacter = 0;
+
+                for (var j = 0; j < 16; j++)
+                    if (bitData[i * 16 + j]) unicodeCharacter |= (int)(1 << j);
+
+                // this not working
+                // if ((char)chars[i] == null) return stringData; // Null일 경우 이후 데이터는 비어있음으로 끝냄
+
+                stringData += (char)unicodeCharacter;
             }
+
+            return stringData;
         }
 
-        return intData;
-    }
 
-    public void PrintBoolArray(bool[] pixelArray)
-    {
-        string test = "";
-        foreach (var pixel in pixelArray)
-        {
-            test += pixel ? "1" : "0";
-        }
-        Debug.Log(test);
-    }
-    /*
-    
+        /* [ Header ]
+         * Header[0] : 0 (Always)
+         * Header[1] : Current Frame
+         * Header[2] : 0 (Always)
+         * Header[3] : All Frame Count
+         * Header[4] : 0 (Always)
+         * Header[5] : Current Frame Byte Size
+         * Header[6] : 0 (Always)
+         * Header[7] : 0 (Always)
+         */
 
-    public bool[] FlipY(bool[] lines)
-    {
-        for (var i = 0; i < 72; i++)
+        private int[] DecryptInt32(bool[] bitData)
         {
-            for (var j = 0; j < 256; j++)
+            var intData = new int[bitData.Length / 32];
+            for (var i = 0; i < intData.Length; i++)
             {
-                var tmp = lines[i * 256 + j];
-                lines[i * 256 + j] = lines[(143 - i) * 256 + j];
-                lines[(143 - i) * 256 + j] = tmp;
+                intData[i] = 0;
+                for (var j = 0; j < 32; j++)
+                {
+                    if (bitData[i * 32 + j]) intData[i] |= (int)(1 << j);
+                }
             }
+
+            return intData;
         }
 
-        return lines;
-    }*/
+        public void PrintBoolArray(bool[] pixelArray)
+        {
+            string test = "";
+            foreach (var pixel in pixelArray)
+            {
+                test += pixel ? "1" : "0";
+            }
+            Debug.Log(test);
+        }
+        /*
 
-    private void OnPrismReady()
-    {
-        OneSectorSize = (36864 / SectorDivision);
 
-        InvokeEvent(nameof(OnPrismReady));
-    }
+        public bool[] FlipY(bool[] lines)
+        {
+            for (var i = 0; i < 72; i++)
+            {
+                for (var j = 0; j < 256; j++)
+                {
+                    var tmp = lines[i * 256 + j];
+                    lines[i * 256 + j] = lines[(143 - i) * 256 + j];
+                    lines[(143 - i) * 256 + j] = tmp;
+                }
+            }
 
-    private void OnPrismStart()
-    {     
-        Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
+            return lines;
+        }*/
 
-        CurrentFrameIndex = 0;
-        FrameCount = 0;
-        CurrentFrameBytes = 0;
+        private void OnPrismReady()
+        {
+            OneSectorSize = (36864 / SectorDivision);
 
-        InvokeEvent(nameof(OnPrismStart));
-    }
+            InvokeEvent(nameof(OnPrismReady));
+        }
 
-    private void OnPrismFrameChange(int[] header)
-    {
-        CurrentFrameIndex = header[1];
-        FrameCount = header[3];
-        CurrentFrameBytes = header[5];
+        private void OnPrismStart()
+        {
+            Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
 
-        CurrentSectorIndex = 1;
+            CurrentFrameIndex = 0;
+            FrameCount = 0;
+            CurrentFrameBytes = 0;
 
-        IsSectorReading = true;
-        IsEndFrameRead = false; // Start Read Current Frame
+            InvokeEvent(nameof(OnPrismStart));
+        }
 
-        Debug.Log($"[PrismDataReader] OnFrameChanged | Current Frame {header[1]}");
+        private void OnPrismFrameChange(int[] header)
+        {
+            CurrentFrameIndex = header[1];
+            FrameCount = header[3];
+            CurrentFrameBytes = header[5];
 
-        InvokeEvent(nameof(OnPrismFrameChange));
-    }
+            CurrentSectorIndex = 1;
 
-    private void OnPrismFrameReadEnd()
-    {
-        IsSectorReading = false;
-        IsEndFrameRead = true; // End Current Frame Read
+            IsSectorReading = true;
+            IsEndFrameRead = false; // Start Read Current Frame
 
-        Debug.Log($"[PrismDataReader] Frame Read End");
+            Debug.Log($"[PrismDataReader] OnFrameChanged | Current Frame {header[1]}");
 
-        InvokeEvent(nameof(OnPrismFrameReadEnd));
-    }
+            InvokeEvent(nameof(OnPrismFrameChange));
+        }
 
-    private void OnPrismReadEnd()
-    {
-        Debug.Log($"[PrismDataReader] Read End");
-        Debug.Log($"[PrismDataReader] Data : {m_Data}");
+        private void OnPrismFrameReadEnd()
+        {
+            IsSectorReading = false;
+            IsEndFrameRead = true; // End Current Frame Read
 
-        IsReadable = false;
+            Debug.Log($"[PrismDataReader] Frame Read End");
 
-        InvokeEvent(nameof(OnPrismReadEnd));
-    }
+            InvokeEvent(nameof(OnPrismFrameReadEnd));
+        }
 
-    private void OnReadEndException()
-    {
-        Debug.Log($"[PrismDataReader] Frame changed while reading");
+        private void OnPrismReadEnd()
+        {
+            Debug.Log($"[PrismDataReader] Read End");
+            Debug.Log($"[PrismDataReader] Data : {m_Data}");
 
-        m_Data = "";
+            IsReadable = false;
 
-        IsSectorReading = false;
-        IsReadable = false;
+            InvokeEvent(nameof(OnPrismReadEnd));
+        }
 
-        OnPrismException("Frame changed while reading");
-    }
+        private void OnReadEndException()
+        {
+            Debug.Log($"[PrismDataReader] Frame changed while reading");
 
-    private void OnPrismException(string e)
-    {
-        m_Error = e;
+            m_Data = "";
 
-        InvokeEvent(nameof(OnPrismException));
-    }
+            IsSectorReading = false;
+            IsReadable = false;
 
-    // IsEndFrameRead : Current Frame Read State [Bool]
-    private void Update()
-    {
-        if (!IsReadable) return;
+            OnPrismException("Frame changed while reading");
+        }
 
-        #region Watcher
+        private void OnPrismException(string e)
+        {
+            m_Error = e;
+
+            InvokeEvent(nameof(OnPrismException));
+        }
+
+        // IsEndFrameRead : Current Frame Read State [Bool]
+        private void Update()
+        {
+            if (!IsReadable) return;
+
+            #region Watcher
 
             var header = DecryptInt32(ReadSector(0));
 
@@ -239,9 +241,9 @@ public class DataReader : UdonSharpBehaviour
 
             if (header[1] > CurrentFrameIndex) OnPrismFrameChange(header);
 
-        #endregion Watcher
+            #endregion Watcher
 
-        #region Read
+            #region Read
 
             if (!IsSectorReading) return;
 
@@ -249,49 +251,50 @@ public class DataReader : UdonSharpBehaviour
             var decryptedData = DecryptUnicode(SectorPixelArray);
             m_Data += decryptedData;
 
-        #endregion Read
+            #endregion Read
 
-        #region End
+            #region End
 
-        if (CurrentSectorIndex == SectorDivision || CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
-        {
-            OnPrismFrameReadEnd();
-        }
-
-        if (CurrentFrameIndex == FrameCount && CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
-        {
-            OnPrismReadEnd();
-        }
-
-        #endregion End
-    }
-
-    private bool[] ReadSector(int sectorIndex)
-    {
-        var firstPixel = sectorIndex * OneSectorSize;
-        var SectorPixelArray = new bool[OneSectorSize];
-
-        for (var i = firstPixel; i < firstPixel + OneSectorSize; i++)
-        {
-            if (sectorIndex >= SectorDivision)
+            if (CurrentSectorIndex == SectorDivision || CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
             {
-                IsSectorReading = false;
-                break;
+                OnPrismFrameReadEnd();
             }
 
-            var XIndex = 2 + (i % 256) * 5;
-            var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
+            if (CurrentFrameIndex == FrameCount && CurrentFrameBytes * 8 <= CurrentSectorIndex * OneSectorSize)
+            {
+                OnPrismReadEnd();
+            }
 
-            var pixel = DataScreen.GetPixel(XIndex, YIndex);
-            SectorPixelArray[i - firstPixel] = pixel.grayscale > 0.5f;
+            #endregion End
         }
 
-        return SectorPixelArray;
-    }
+        private bool[] ReadSector(int sectorIndex)
+        {
+            var firstPixel = sectorIndex * OneSectorSize;
+            var SectorPixelArray = new bool[OneSectorSize];
+
+            for (var i = firstPixel; i < firstPixel + OneSectorSize; i++)
+            {
+                if (sectorIndex >= SectorDivision)
+                {
+                    IsSectorReading = false;
+                    break;
+                }
+
+                var XIndex = 2 + (i % 256) * 5;
+                var YIndex = 717 - (i / 256) * 5; /*2 + (i / 256) * 5*/
+
+                var pixel = DataScreen.GetPixel(XIndex, YIndex);
+                SectorPixelArray[i - firstPixel] = pixel.grayscale > 0.5f;
+            }
+
+            return SectorPixelArray;
+        }
 
 
-    private void InvokeEvent(string eventName)
-    {
-        EventBehaviour.SendCustomEvent(eventName);
+        private void InvokeEvent(string eventName)
+        {
+            EventBehaviour.Invoke(eventName);
+        }
     }
 }
