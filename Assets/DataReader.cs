@@ -120,6 +120,10 @@ public class DataReader : UdonSharpBehaviour
     private void OnPrismStart()
     {     
         Debug.Log($"[PrismDataReader] Start Read | OneSectorSize {OneSectorSize}");
+
+        CurrentFrameIndex = 0;
+        FrameCount = 0;
+        CurrentFrameBytes = 0;
     }
 
     private void OnFrameChange(int[] header)
@@ -149,20 +153,12 @@ public class DataReader : UdonSharpBehaviour
         Debug.Log($"[PrismDataReader] Read End");
         Debug.Log($"[PrismDataReader] Data : {m_Data}");
 
-        CurrentFrameIndex = 0;
-        FrameCount = 0;
-        CurrentFrameBytes = 0;
-
         IsReadable = false;
     }
 
     private void OnReadEndException()
     {
         Debug.Log($"[PrismDataReader] Frame changed while reading");
-
-        CurrentFrameIndex = 0;
-        FrameCount = 0;
-        CurrentFrameBytes = 0;
 
         m_Data = "";
 
