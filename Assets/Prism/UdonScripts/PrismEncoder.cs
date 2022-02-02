@@ -4,10 +4,22 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class PrismEncoder : UdonSharpBehaviour
+namespace Prism
 {
-    void Start()
+    public class PrismEncoder : UdonSharpBehaviour
     {
-        
+        public DataMap DataMap;
+        public bool[] StringToBinary(string data)
+        {
+            var binary = new bool[data.Length * 8];
+
+            var k = 0;
+
+            for(var i = 0; i< data.Length; i++)
+            {
+
+                k++;
+            }
+        }
     }
 }

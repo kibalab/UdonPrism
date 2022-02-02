@@ -4,8 +4,11 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class DataMap : UdonSharpBehaviour
+namespace Prism
 {
-    public VRCUrl[] endPointBaseMap;
-    [SerializeField] public VRCUrl[] endPointCommandMap;
+    public class DataMap : UdonSharpBehaviour
+    {
+        public VRCUrl[] endPointBaseMap;
+        [SerializeField] public VRCUrl[] endPointCommandMap;
+    }
 }
