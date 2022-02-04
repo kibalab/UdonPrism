@@ -9,17 +9,33 @@ namespace Prism
     public class PrismEncoder : UdonSharpBehaviour
     {
         public DataMap DataMap;
-        public bool[] StringToBinary(string data)
+        public string StringToBase64(string data)
         {
-            var binary = new bool[data.Length * 8];
+            string result = "";
+            
+            char[] dataCharArray = data.ToCharArray();
 
-            var k = 0;
-
-            for(var i = 0; i< data.Length; i++)
+            for (int i = 0; i < dataCharArray.Length / 3; i++)
             {
-
-                k++;
+                result += (char) (dataCharArray[i * 3] >> 2) & 0x3F;
+                result += (char) (((dataCharArray[i * 3] & 3) << 4) | (dataCharArray[i * 3 + 1] >> 4)) & 0x3F;
+                result += (char) (((dataCharArray[i * 3 + 1] & 15) << 2) | (dataCharArray[i * 3 + 2] >> 6)) & 0x3F;
+                result += (char) (dataCharArray[i * 3 + 2] & 0x3F);
             }
+
+            if (dataCharArray.Length % 3 == 1)
+            {
+                result += (char) (dataCharArray[dataCharArray.Length - 1] >> 2) & 0x3F;
+                result += (char) ((dataCharArray[dataCharArray.Length - 1] & 3) << 4) & 0x3F;
+            }
+            else if (dataCharArray.Length % 3 == 2)
+            {
+                result += (char) (dataCharArray[dataCharArray.Length - 2] >> 2) & 0x3F;
+                result += (char) (((dataCharArray[dataCharArray.Length - 2] & 3) << 4) | (dataCharArray[dataCharArray.Length - 1] >> 4)) & 0x3F;
+                result += (char) ((dataCharArray[dataCharArray.Length - 1] & 15) << 2) & 0x3F;
+            }
+
+            return result;
         }
     }
 }
