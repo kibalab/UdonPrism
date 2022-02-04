@@ -109,8 +109,7 @@ namespace Prism.Setup
 
                         origin.map.endPointBaseMap = baseURLMap;
 
-                        origin.map.endPointCommandMap[0] = new VRCUrl(origin.StartUrl + "end");
-                        origin.map.endPointCommandMap[0] = new VRCUrl(origin.StartUrl + "end");
+                        SetCommand(true);
 
                         UdonSharpEditorUtility.ConvertToUdonBehaviours(new UdonSharp.UdonSharpBehaviour[] { origin.map }, false);
                     });
@@ -129,7 +128,7 @@ namespace Prism.Setup
 
             if (EditorGUI.EndChangeCheck())
             {
-                SetCommand();
+                SetCommand(false);
             }
             EditorGUI.EndDisabledGroup();
 
@@ -154,13 +153,13 @@ namespace Prism.Setup
             }
         }
 
-        public void SetCommand()
+        public void SetCommand(bool includeURL)
         {
             var i = 0;
-            origin.map.endPointCommandMap = new VRCUrl[origin.endPointCommand.Length];
+            origin.map.endPointCommandMap = new VRCUrl[origin.endPointCommand.Length + 2];
             foreach (var command in origin.endPointCommand)
             {
-                origin.map.endPointCommandMap[i] = new VRCUrl(command);
+                origin.map.endPointCommandMap[i] = new VRCUrl((includeURL ? origin.StartUrl : "") + command);
                 i++;
             }
         }
