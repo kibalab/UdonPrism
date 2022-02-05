@@ -86,7 +86,7 @@ namespace Prism.Setup
                             origin.StartUrl += '/';
                         }
 
-                        var baseURLMap = new VRCUrl[64];
+                        var baseURLMap = new VRCUrl[65];
                         var i = 0;
 
                         for (var k = 'A'; k <= 'Z'; k++)
@@ -106,12 +106,13 @@ namespace Prism.Setup
                         }
                         baseURLMap[62] = new VRCUrl(origin.StartUrl + '+');
                         baseURLMap[63] = new VRCUrl(origin.StartUrl + '/');
+                        baseURLMap[64] = new VRCUrl(origin.StartUrl + '=');
 
                         origin.map.endPointBaseMap = baseURLMap;
 
                         SetCommand(true);
 
-                        UdonSharpEditorUtility.ConvertToUdonBehaviours(new UdonSharp.UdonSharpBehaviour[] { origin.map }, false);
+                        UdonSharpEditorUtility.ConvertToUdonBehaviours(new UdonSharp.UdonSharpBehaviour[] { origin.map, origin.map.GetComponentInChildren<PrismEncoder>() }, true);
                     });
                 }
             }
