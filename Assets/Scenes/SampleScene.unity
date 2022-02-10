@@ -131,12 +131,17 @@ PrefabInstance:
     - target: {fileID: 3484026330517194196, guid: c0c2025e466a5194e9a81e669f370672,
         type: 3}
       propertyPath: loop
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3484026330517194196, guid: c0c2025e466a5194e9a81e669f370672,
         type: 3}
       propertyPath: autoPlay
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3484026330517194196, guid: c0c2025e466a5194e9a81e669f370672,
+        type: 3}
+      propertyPath: videoURL.url
+      value: http://localhost:8080/
       objectReference: {fileID: 0}
     - target: {fileID: 3484026330517194203, guid: c0c2025e466a5194e9a81e669f370672,
         type: 3}
@@ -172,6 +177,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Prism 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3754056012041662027, guid: c0c2025e466a5194e9a81e669f370672,
+        type: 3}
+      propertyPath: endPointCommand.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3754056012041662027, guid: c0c2025e466a5194e9a81e669f370672,
+        type: 3}
+      propertyPath: endPointCommand.Array.data[4]
+      value: end
       objectReference: {fileID: 0}
     - target: {fileID: 3754056012041662028, guid: c0c2025e466a5194e9a81e669f370672,
         type: 3}
