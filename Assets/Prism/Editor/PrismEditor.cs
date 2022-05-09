@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UdonSharpEditor;
 using UnityEditor;
@@ -8,6 +9,8 @@ using UnityEditorInternal;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using K13A.BehaviourEditor;
+using Prism.BehaviourEditor;
 
 namespace Prism.Setup
 {
@@ -15,15 +18,18 @@ namespace Prism.Setup
     public class PrismEditor : Editor
     {
         public PrismSetup origin;
+        public Texture2D LOGO;
         private ReorderableList BehaviourList, CommandList;
 
         private void OnEnable()
         {
+            #region ReorderableList Initialize
+
             {
                 var behaviourArray = serializedObject.FindProperty("events");
                 BehaviourList = new ReorderableList(serializedObject, behaviourArray, true, true, true, true);
 
-                BehaviourList.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Event Invoke Behaviours");
+                BehaviourList.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Evnet Invoke Target (UdonBehaviour)");
 
                 BehaviourList.drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
@@ -38,7 +44,7 @@ namespace Prism.Setup
                 var commandArray = serializedObject.FindProperty("endPointCommand");
                 CommandList = new ReorderableList(serializedObject, commandArray, true, true, true, true);
 
-                CommandList.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Server EndPoint Commands");
+                CommandList.drawHeaderCallback = (rect) => EditorGUI.LabelField(rect, "Defined EndPoint Commands (URL/String)");
 
                 CommandList.drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
@@ -48,121 +54,111 @@ namespace Prism.Setup
                     EditorGUI.PropertyField(rect, behaviour, new GUIContent(""));
                 };
             }
+
+            #endregion
         }
 
         public override void OnInspectorGUI()
         {
-            //base.OnInspectorGUI();
-
-            EditorGUILayout.Space(20);
-
             origin = (PrismSetup)target;
 
-            ReSize(EditorGUILayout.FloatField("Size", origin.Size));
-
-            EditorGUILayout.Space(10);
-
-            origin.InputField.SetActive(EditorGUILayout.Toggle("Use Input Field", origin.InputField.activeSelf));
-
-            EditorGUILayout.Space(20);
-
-            EditorGUILayout.BeginVertical("Box");
-
-            EditorGUI.BeginDisabledGroup(origin.UrlSetted);
-            EditorGUILayout.BeginHorizontal();
-
-            origin.StartUrl = EditorGUILayout.TextField("Start Url", origin.StartUrl);
-
-            if (!origin.UrlSetted)
+            GUI.skin.label.richText = true;
+            GUILayout.Space(20);
+            var titleStyle = new GUIStyle();
+            titleStyle.normal.background = null;
+            titleStyle.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Box(LOGO, titleStyle, GUILayout.ExpandWidth(true), GUILayout.Height(100));
+            GUILayout.Space(20);
+            
+            
+            EditorUtil.MenuBox("Setup", () =>
             {
-                if (GUILayout.Button("SET"))
+                EditorGUILayout.Space(20);
+                
+                EditorUtil.SubMenuBox("General", () =>
                 {
-                    new AskPopup(() => {
-                        origin.UrlSetted = true;
+                    ReSize(EditorGUILayout.FloatField("Size", origin.Size));
 
+                    origin.InputField.SetActive(EditorGUILayout.Toggle("Use Input Field", origin.InputField.activeSelf));
+                }, new ContentStyle(GUI.skin.font));
+                
+                EditorGUILayout.Space(20);
+                
+                EditorUtil.SubMenuBox("Network", () =>
+                {
+                    origin.StartUrl = EditorGUILayout.TextField("Start Url", origin.StartUrl);
+                    origin.c_InputField.SetUrl(new VRCUrl(origin.StartUrl));
+                    serializedObject.Update();
+                        CommandList.DoLayoutList();
+                        SetEndPoints(false);
+                    serializedObject.ApplyModifiedProperties();
+                }, new ContentStyle(GUI.skin.font));
+                
+            }, new ContentStyle(GUI.skin.font));
 
-                        if (!origin.StartUrl.EndsWith("/"))
-                        {
-                            origin.StartUrl += '/';
-                        }
+            EditorUtil.MenuBox("Event", () =>
+            {
+                serializedObject.Update();
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.LabelField($" ", GUI.skin.label);
+                    BehaviourList.DoLayoutList();
+                    SetEvents();
+                serializedObject.ApplyModifiedProperties();
+            }, new ContentStyle(GUI.skin.font));
 
-                        var baseURLMap = new VRCUrl[65];
-                        var i = 0;
-
-                        for (var k = 'A'; k <= 'Z'; k++)
-                        {
-                            baseURLMap[i] = new VRCUrl(origin.StartUrl + k);
-                            i++;
-                        }
-                        for (var k = 'a'; k <= 'z'; k++)
-                        {
-                            baseURLMap[i] = new VRCUrl(origin.StartUrl + k);
-                            i++;
-                        }
-                        for (var k = '0'; k <= '9'; k++)
-                        {
-                            baseURLMap[i] = new VRCUrl(origin.StartUrl + k);
-                            i++;
-                        }
-                        baseURLMap[62] = new VRCUrl(origin.StartUrl + '+');
-                        baseURLMap[63] = new VRCUrl(origin.StartUrl + '/');
-                        baseURLMap[64] = new VRCUrl(origin.StartUrl + '=');
-
-                        origin.map.endPointBaseMap = baseURLMap;
-
-                        SetCommand(true);
-
-                        UdonSharpEditorUtility.ConvertToUdonBehaviours(new UdonSharp.UdonSharpBehaviour[] { origin.map, origin.map.GetComponentInChildren<PrismEncoder>() }, true);
-                    });
+            EditorGUILayout.Space(40);
+            
+            origin.CraditOpen = EditorUtil.FoldoutMenuBox("Cradit", origin.CraditOpen, () =>
+            {
+                EditorUtil.DrawSubTitle("System");
+                EditorGUILayout.LabelField($"    <b>KIBA</b>", GUI.skin.label);
+                EditorGUILayout.LabelField($"    <b>SieR</b>", GUI.skin.label);
+                EditorGUILayout.Space(10);
+                EditorUtil.DrawSubTitle("Deisgn");
+                EditorGUILayout.LabelField($"    <b>KIBA</b>", GUI.skin.label);
+                EditorGUILayout.Space(10);
+            }, new ContentStyle(GUI.skin.font));
+        }
+        
+        public void SetEndPoints(bool includeURL)
+        {
+            if (!origin.map)
+            {
+                origin.map = origin.gameObject.GetUdonSharpComponentInChildren<DataMap>();
+            }
+            
+            if (!origin.StartUrl.EndsWith("/"))
+            {
+                origin.StartUrl += '/';
+            }
+            
+            var baseURLMap = new List<VRCUrl>();
+            
+            void SetUrlsbyRange(char a, char b)
+            {
+                for (var k = a; k <= b; k++)
+                {
+                    baseURLMap.Add(new VRCUrl(origin.StartUrl + k));
                 }
             }
-            EditorGUILayout.EndHorizontal();
+
+            SetUrlsbyRange('A', 'Z');
+            SetUrlsbyRange('a', 'z');
+            SetUrlsbyRange('0', '9');
+            
+            baseURLMap.Add(new VRCUrl(origin.StartUrl + '+'));
+            baseURLMap.Add(new VRCUrl(origin.StartUrl + '/'));
+            baseURLMap.Add(new VRCUrl(origin.StartUrl + '='));
+
+            BehaviourFieldUtil.SetVariableValue(origin.map, typeof(DataMap).GetField("endPointBaseMap"), baseURLMap.ToArray());
 
 
-            serializedObject.Update();
-
-            EditorGUI.BeginChangeCheck();
-
-            CommandList.DoLayoutList();
-
-            serializedObject.ApplyModifiedProperties();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                SetCommand(false);
-            }
-            EditorGUI.EndDisabledGroup();
-
-            EditorGUILayout.EndVertical();
-
-            origin.c_InputField.SetUrl(new VRCUrl(origin.StartUrl));
-
-            EditorGUILayout.Space(20);
-
-
-            serializedObject.Update();
-
-            EditorGUI.BeginChangeCheck();
-
-            BehaviourList.DoLayoutList();
-
-            serializedObject.ApplyModifiedProperties();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                SetEvents();
-            }
-        }
-
-        public void SetCommand(bool includeURL)
-        {
-            var i = 0;
-            origin.map.endPointCommandMap = new VRCUrl[origin.endPointCommand.Length + 2];
+            var endPointCommand = new List<VRCUrl>();
             foreach (var command in origin.endPointCommand)
             {
-                origin.map.endPointCommandMap[i] = new VRCUrl((includeURL ? origin.StartUrl : "") + command);
-                i++;
+                endPointCommand.Add(new VRCUrl((includeURL ? origin.StartUrl : "") + command));
             }
+            BehaviourFieldUtil.SetVariableValue(origin.map, typeof(DataMap).GetField("endPointCommandMap"), endPointCommand.ToArray());
         }
 
         public void SetEvents()
@@ -202,39 +198,6 @@ namespace Prism.Setup
             origin.transform.localScale = new Vector3(size, size, size);
             origin.CaptureCam.orthographicSize = origin.OriginSize * size;
             origin.Size = size;
-        }
-    }
-
-    public delegate void Func();
-
-    public class AskPopup : EditorWindow
-    {
-        public Func func;
-        public AskPopup(Func func)
-        {
-            this.func = func;
-            var window = (AskPopup)GetWindow(typeof(AskPopup), utility: true, title: "ASK", focus: true);
-            window.Show();
-            window.minSize = new Vector2(209, 100);
-            window.maxSize = window.minSize;
-
-            window.position = new Rect(Screen.currentResolution.width / 2 - window.minSize.x / 2, Screen.currentResolution.height / 2 - window.minSize.y / 2, 0, 0);
-        }
-
-        void OnGUI()
-        {
-            EditorGUILayout.LabelField("After that, you can't edit it.\nWould you like to go on ? ", GUILayout.Height(50));
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Cancel", GUILayout.Width(100), GUILayout.Height(50)))
-            {
-                this.Close();
-            }
-            if (GUILayout.Button("OK", GUILayout.Width(100), GUILayout.Height(50)))
-            {
-                func.Invoke();
-                this.Close();
-            }
-            EditorGUILayout.EndHorizontal();
         }
     }
 }

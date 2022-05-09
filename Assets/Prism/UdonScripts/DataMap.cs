@@ -9,6 +9,6 @@ namespace Prism
     public class DataMap : UdonSharpBehaviour
     {
         public VRCUrl[] endPointBaseMap;
-        [SerializeField] public VRCUrl[] endPointCommandMap;
+        public VRCUrl[] endPointCommandMap;
     }
 }

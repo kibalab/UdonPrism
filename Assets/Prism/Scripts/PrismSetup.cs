@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.Events;
 using VRC.SDK3.Components;
@@ -15,10 +16,10 @@ namespace Prism.Setup
         public Camera CaptureCam;
         public float OriginSize = 2.813095f;
         public string StartUrl = "http://localhost:8080/";
-        public bool UrlSetted;
+        public bool CraditOpen;
         public GameObject EventPool;
-        public DataMap map;
+        public UdonSharpBehaviour map;
         public string[] endPointCommand;
         [SerializeField] public UdonBehaviour[] events;
-    }
+    }   
 }
