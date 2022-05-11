@@ -9,10 +9,6 @@ using VRC.Udon;
 
 public class PrismVideoController : UdonSharpBehaviour
 {
-    public bool isSending = false;
-
-    public float req_freq = 1.0f;
-
     public VRCUnityVideoPlayer player;
 
     public VRCUrlInputField stateField;
@@ -23,92 +19,69 @@ public class PrismVideoController : UdonSharpBehaviour
 
     uint RequestIndex = 0;
 
-    VRCUrl[] urls;
-
-    float m_req_freq;
+    VRCUrl[] query;
+    VRCUrl currentUrl;
 
     private void Start()
     {
         map = dataMap.GetComponent<DataMap>();
     }
 
-
-    /*
-    public override void OnVideoEnd()
-    {
-        if (urls.Length == RequestIndex)
-        {
-            isSending = false;
-
-            stateField.SetUrl(map.endPointCommandMap[0]); // End Command
-            player.PlayURL(map.endPointCommandMap[0]);
-            Debug.Log($"[Prism Player Controller] End Request");
-        }
-        else
-        {
-            stateField.SetUrl(urls[++RequestIndex]);
-            player.PlayURL(urls[RequestIndex]);
-            Debug.Log($"[Prism Player Controller] Request URL : {urls[RequestIndex].Get()}");
-        }
-    }
-    */
-
     public void SendData(VRCUrl[] data)
     {
-        urls = data;
-
+        query = data;
         RequestIndex = 0;
 
-        isSending = true;
-
-        m_req_freq = req_freq;
-
-
-        /*
-        stateField.SetUrl(urls[RequestIndex]);
-        player.PlayURL(urls[RequestIndex]);
-        Debug.Log($"[Prism Player Controller] Request URL : {urls[RequestIndex].Get()}");
-        */
+        Debug.Log("[PrismVideoController] SendData");
+        PlayVideo(query[RequestIndex++]);
     }
 
     public void Update()
     {
-        if (!isSending) return;
+        if (query == null)
+            return;
+        
+        if (currentUrl != null && RequestIndex != 0)
+            return;
 
-        m_req_freq -= Time.deltaTime;
-
-        if (m_req_freq > 0) return;
-
-        VRCUrl url;
-
-        if (urls.Length == RequestIndex)
+        if (RequestIndex == query.Length)
         {
-            isSending = false;
-
-            url = map.endPointCommandMap[0]; // End Command
-        }
-        else
-        {
-            url = urls[RequestIndex];
+            query = null;
+            RequestIndex = 0;
+            return;
         }
 
-        if(stateField != null)
-        {
-            stateField.SetUrl(url);
-        }
+        PlayVideo(query[RequestIndex++]);
+    }
 
-        Debug.Log($"[Prism Player Controller] Request URL : {url.Get()}");
-
+    void PlayVideo(VRCUrl url)
+    {
+        StopVideo();
+        currentUrl = url;
         player.LoadURL(url);
+        Debug.Log("[PrismVideoController] PlayVideo " + url.Get());
+    }
 
-        if (url.Get().EndsWith("end"))
-        {
-            isSending = false;
-            Debug.Log($"[Prism Player Controller] End Request");
-        }
+    public override void OnVideoReady()
+    {
+        player.Play();
+    }
 
-        RequestIndex++;
+    public override void OnVideoStart()
+    {
+        player.SetTime(0f);
+        SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "AllowRender");
+    }
 
-        m_req_freq = req_freq;
+    public override void OnVideoEnd()
+    {
+        Debug.Log("[PrismVideoController] OnVideoEnd");
+        StopVideo();
+    }
+
+    void StopVideo()
+    {
+        player.Stop();
+        currentUrl = null;
     }
 }
