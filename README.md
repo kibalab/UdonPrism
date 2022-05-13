@@ -36,7 +36,7 @@ Server to Client Networking System Based on Video Player<br>
 ## 🧰 Use / 사용
 
 ### :open_file_folder: Client Install (Unity/U#)
-- Please download it here -> **[Release](https://github.com/kibalab/Udon_Prism_Public/releases)**
+- Please download it here -> **[Release](https://github.com/kibalab/UdonPrism/releases)**
 - Import it into your Unity Project
 - Place the "Toggle" prefab
 
