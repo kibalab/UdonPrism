@@ -26,6 +26,9 @@ namespace Prism.Setup
             #region ReorderableList Initialize
 
             {
+                if(PrefabUtility.IsPartOfPrefabInstance(((PrismSetup)target).gameObject))
+                    PrefabUtility.UnpackPrefabInstance(((PrismSetup)target).gameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                
                 var behaviourArray = serializedObject.FindProperty("events");
                 BehaviourList = new ReorderableList(serializedObject, behaviourArray, true, true, true, true);
 
