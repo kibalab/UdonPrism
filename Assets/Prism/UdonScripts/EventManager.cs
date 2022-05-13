@@ -15,11 +15,15 @@ namespace Prism
             prismEvents = GetComponentsInChildren<PrismEvent>();
         }
 
-        public void Invoke(string eventName)
+        public void Invoke(string eventName, string data)
         {
             foreach (var prismEvent in prismEvents)
             {
-                if (prismEvent != null) prismEvent.behaviour.SendCustomEvent(eventName);
+                if (prismEvent != null)
+                {
+                    prismEvent.behaviour.SendCustomEvent(eventName);
+                    prismEvent.behaviour.SetProgramVariable("Prism_Data", data);
+                }
             }
         }
     }

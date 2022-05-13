@@ -149,7 +149,7 @@ namespace Prism
         {
             OneSectorSize = (36864 / SectorDivision);
 
-            InvokeEvent(nameof(OnPrismReady));
+            InvokeEvent(nameof(OnPrismReady), m_Data);
         }
 
         private void OnPrismStart()
@@ -160,7 +160,7 @@ namespace Prism
             FrameCount = 0;
             CurrentFrameBytes = 0;
 
-            InvokeEvent(nameof(OnPrismStart));
+            InvokeEvent(nameof(OnPrismStart), m_Data);
         }
 
         private void OnPrismFrameChange(int[] header)
@@ -176,7 +176,7 @@ namespace Prism
 
             Debug.Log($"[PrismDataReader] OnFrameChanged | Current Frame {header[1]}");
 
-            InvokeEvent(nameof(OnPrismFrameChange));
+            InvokeEvent(nameof(OnPrismFrameChange), m_Data);
         }
 
         private void OnPrismFrameReadEnd()
@@ -186,7 +186,7 @@ namespace Prism
 
             Debug.Log($"[PrismDataReader] Frame Read End");
 
-            InvokeEvent(nameof(OnPrismFrameReadEnd));
+            InvokeEvent(nameof(OnPrismFrameReadEnd), m_Data);
         }
 
         private void OnPrismReadEnd()
@@ -196,7 +196,7 @@ namespace Prism
 
             IsReadable = false;
 
-            InvokeEvent(nameof(OnPrismReadEnd));
+            InvokeEvent(nameof(OnPrismReadEnd), m_Data);
         }
 
         private void OnReadEndException()
@@ -215,7 +215,7 @@ namespace Prism
         {
             m_Error = e;
 
-            InvokeEvent(nameof(OnPrismException));
+            InvokeEvent(nameof(OnPrismException), m_Error);
         }
 
         // IsEndFrameRead : Current Frame Read State [Bool]
@@ -292,9 +292,9 @@ namespace Prism
         }
 
 
-        private void InvokeEvent(string eventName)
+        private void InvokeEvent(string eventName, string data)
         {
-            EventBehaviour.Invoke(eventName);
+            EventBehaviour.Invoke(eventName, data);
         }
     }
 }
